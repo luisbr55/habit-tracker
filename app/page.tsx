@@ -1,0 +1,74 @@
+import { and, isNull, inArray } from "drizzle-orm";
+import { db } from "@/db";
+import { habits, habitCompletions } from "@/db/schema";
+import { isScheduledDay, todayISO } from "@/lib/dateUtils";
+import { calculateStreak } from "@/lib/streaks";
+import { NavTabs } from "@/components/NavTabs";
+import { HabitList } from "@/components/HabitList";
+import { AddHabitButton } from "@/components/AddHabitButton";
+import { EmptyState } from "@/components/EmptyState";
+import type { HabitWithStatus } from "@/lib/types";
+
+export default async function TodayPage() {
+  const today = new Date();
+  const todayStr = todayISO();
+
+  const activeHabits = await db
+    .select()
+    .from(habits)
+    .where(isNull(habits.archivedAt));
+
+  if (activeHabits.length === 0) {
+    return (
+      <main>
+        <NavTabs />
+        <EmptyState
+          title="Todavía no tenés hábitos."
+          description="Agregá el primero desde el botón de abajo."
+        />
+        <AddHabitButton />
+      </main>
+    );
+  }
+
+  const habitsToday = activeHabits.filter((h) =>
+    isScheduledDay(today, h.scheduledDays)
+  );
+
+  const allCompletions =
+    habitsToday.length > 0
+      ? await db
+          .select()
+          .from(habitCompletions)
+          .where(
+            inArray(
+              habitCompletions.habitId,
+              habitsToday.map((h) => h.id)
+            )
+          )
+      : [];
+
+  const completionsByHabit = new Map<string, typeof allCompletions>();
+  for (const c of allCompletions) {
+    const list = completionsByHabit.get(c.habitId) ?? [];
+    list.push(c);
+    completionsByHabit.set(c.habitId, list);
+  }
+
+  const habitsWithStatus: HabitWithStatus[] = habitsToday.map((h) => {
+    const completions = completionsByHabit.get(h.id) ?? [];
+    return {
+      ...h,
+      completedToday: completions.some((c) => c.date === todayStr),
+      streak: calculateStreak(h, completions, today),
+    };
+  });
+
+  return (
+    <main>
+      <NavTabs />
+      <HabitList habits={habitsWithStatus} today={todayStr} />
+      <AddHabitButton />
+    </main>
+  );
+}
