@@ -53,3 +53,43 @@ export function isStreakActiveToday(
   }
   return completions.some((c) => c.date === toISODate(referenceDate));
 }
+
+/**
+ * Racha más larga histórica: recorre todo el historial de días programados
+ * desde `createdAt` hasta `referenceDate`, y devuelve el mayor tramo consecutivo
+ * de días programados cumplidos que se haya dado alguna vez (no solo el vigente).
+ * Misma regla de corte que calculateStreak (sin margen), pero sin detenerse en el
+ * primer corte — sigue para encontrar el máximo.
+ */
+export function calculateLongestStreak(
+  habit: Pick<Habit, "scheduledDays" | "createdAt">,
+  completions: Pick<HabitCompletion, "date">[],
+  referenceDate: Date = new Date()
+): number {
+  const completedDates = new Set(completions.map((c) => c.date));
+  const createdAt =
+    typeof habit.createdAt === "string"
+      ? parseISO(habit.createdAt)
+      : habit.createdAt;
+
+  let longest = 0;
+  let current = 0;
+  let cursor = new Date(referenceDate);
+  const MAX_ITERATIONS = 3650;
+  let iterations = 0;
+
+  while (!isBefore(cursor, createdAt) && iterations < MAX_ITERATIONS) {
+    iterations++;
+    if (isScheduledDay(cursor, habit.scheduledDays)) {
+      if (completedDates.has(toISODate(cursor))) {
+        current++;
+        longest = Math.max(longest, current);
+      } else {
+        current = 0;
+      }
+    }
+    cursor = subDays(cursor, 1);
+  }
+
+  return longest;
+}

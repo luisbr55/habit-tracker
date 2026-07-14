@@ -6,6 +6,8 @@ import { toggleCompletion } from "@/app/actions/completions";
 export function HabitCard({
   habitId,
   name,
+  icon,
+  categoryColor,
   streak,
   completedToday,
   streakActive,
@@ -14,6 +16,8 @@ export function HabitCard({
 }: {
   habitId: string;
   name: string;
+  icon: string;
+  categoryColor: string;
   streak: number;
   completedToday: boolean;
   streakActive: boolean;
@@ -69,6 +73,14 @@ export function HabitCard({
             </svg>
           )}
         </button>
+
+        <span
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-base"
+          style={{ backgroundColor: `${categoryColor}1A` }} // ~10% opacidad
+          aria-hidden="true"
+        >
+          {icon}
+        </span>
 
         <span className="text-base text-text">{name}</span>
       </div>

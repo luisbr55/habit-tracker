@@ -8,8 +8,17 @@ export function HabitWeeklyRow({ stat }: { stat: HabitWeeklyStat }) {
 
   return (
     <div className="rounded-card border border-border bg-surface p-4">
-      <div className="mb-2 flex items-baseline justify-between">
-        <span className="text-base text-text">{stat.name}</span>
+      <div className="mb-2 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span
+            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-sm"
+            style={{ backgroundColor: `${stat.categoryColor}1A` }}
+            aria-hidden="true"
+          >
+            {stat.icon}
+          </span>
+          <span className="text-base text-text">{stat.name}</span>
+        </div>
         <span className="text-sm font-semibold text-text">
           {label}
           <span className="ml-1 font-normal text-text-muted">
@@ -23,6 +32,9 @@ export function HabitWeeklyRow({ stat }: { stat: HabitWeeklyStat }) {
           style={{ width: `${widthPct}%` }}
         />
       </div>
+      <p className="mt-2 text-xs text-text-muted">
+        🏆 Mejor racha: {stat.longestStreak} {stat.longestStreak === 1 ? "día" : "días"}
+      </p>
     </div>
   );
 }

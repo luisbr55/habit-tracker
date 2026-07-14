@@ -18,6 +18,8 @@ export function HabitList({
     id: string;
     name: string;
     days: DayKey[];
+    icon: string;
+    categoryId: string;
   } | null>(null);
 
   if (habits.length === 0) {
@@ -37,6 +39,8 @@ export function HabitList({
             key={habit.id}
             habitId={habit.id}
             name={habit.name}
+            icon={habit.icon}
+            categoryColor={habit.category.color}
             streak={habit.streak}
             completedToday={habit.completedToday}
             streakActive={habit.completedToday}
@@ -46,6 +50,8 @@ export function HabitList({
                 id: habit.id,
                 name: habit.name,
                 days: maskToDays(habit.scheduledDays),
+                icon: habit.icon,
+                categoryId: habit.categoryId,
               })
             }
           />

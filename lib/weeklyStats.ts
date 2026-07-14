@@ -1,13 +1,17 @@
 import { scheduledDaysInWeek, toISODate } from "./dateUtils";
+import { calculateLongestStreak } from "./streaks";
 import type { Habit, HabitCompletion } from "@/db/schema";
 
 export type HabitWeeklyStat = {
   habitId: string;
   name: string;
+  icon: string;
+  categoryColor: string;
   scheduledCount: number;
   completedCount: number;
   /** null cuando scheduledCount es 0 → todavía no transcurrió ningún día programado */
   percentage: number | null;
+  longestStreak: number;
 };
 
 export type WeeklyStats = {
@@ -25,8 +29,12 @@ export type WeeklyStats = {
  * sdd/spec-habitos/technical-spec.md → "Cálculo de % semanal".
  */
 export function calculateWeeklyStats(
-  habits: Pick<Habit, "id" | "name" | "scheduledDays" | "createdAt">[],
+  habits: Pick<
+    Habit,
+    "id" | "name" | "icon" | "scheduledDays" | "createdAt"
+  >[],
   completionsByHabit: Map<string, Pick<HabitCompletion, "date">[]>,
+  categoryColorByHabit: Map<string, string>,
   referenceDate: Date = new Date()
 ): WeeklyStats {
   let totalScheduled = 0;
@@ -52,9 +60,12 @@ export function calculateWeeklyStats(
     return {
       habitId: habit.id,
       name: habit.name,
+      icon: habit.icon,
+      categoryColor: categoryColorByHabit.get(habit.id) ?? "#78716C",
       scheduledCount,
       completedCount,
       percentage: scheduledCount === 0 ? null : completedCount / scheduledCount,
+      longestStreak: calculateLongestStreak(habit, completions, referenceDate),
     };
   });
 

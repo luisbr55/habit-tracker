@@ -1,6 +1,6 @@
-import { and, isNull, inArray } from "drizzle-orm";
+import { isNull, inArray, eq } from "drizzle-orm";
 import { db } from "@/db";
-import { habits, habitCompletions } from "@/db/schema";
+import { habits, habitCompletions, categories } from "@/db/schema";
 import { isScheduledDay, todayISO } from "@/lib/dateUtils";
 import { calculateStreak } from "@/lib/streaks";
 import { NavTabs } from "@/components/NavTabs";
@@ -14,8 +14,22 @@ export default async function TodayPage() {
   const todayStr = todayISO();
 
   const activeHabits = await db
-    .select()
+    .select({
+      id: habits.id,
+      name: habits.name,
+      icon: habits.icon,
+      categoryId: habits.categoryId,
+      scheduledDays: habits.scheduledDays,
+      createdAt: habits.createdAt,
+      archivedAt: habits.archivedAt,
+      category: {
+        id: categories.id,
+        name: categories.name,
+        color: categories.color,
+      },
+    })
     .from(habits)
+    .innerJoin(categories, eq(habits.categoryId, categories.id))
     .where(isNull(habits.archivedAt));
 
   if (activeHabits.length === 0) {

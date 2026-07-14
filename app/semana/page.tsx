@@ -1,6 +1,6 @@
-import { isNull, inArray } from "drizzle-orm";
+import { isNull, inArray, eq } from "drizzle-orm";
 import { db } from "@/db";
-import { habits, habitCompletions } from "@/db/schema";
+import { habits, habitCompletions, categories } from "@/db/schema";
 import { calculateWeeklyStats } from "@/lib/weeklyStats";
 import { NavTabs } from "@/components/NavTabs";
 import { WeeklyOverallProgress } from "@/components/WeeklyOverallProgress";
@@ -10,8 +10,18 @@ import { AddHabitButton } from "@/components/AddHabitButton";
 
 export default async function WeekPage() {
   const activeHabits = await db
-    .select()
+    .select({
+      id: habits.id,
+      name: habits.name,
+      icon: habits.icon,
+      categoryId: habits.categoryId,
+      scheduledDays: habits.scheduledDays,
+      createdAt: habits.createdAt,
+      archivedAt: habits.archivedAt,
+      categoryColor: categories.color,
+    })
     .from(habits)
+    .innerJoin(categories, eq(habits.categoryId, categories.id))
     .where(isNull(habits.archivedAt));
 
   if (activeHabits.length === 0) {
@@ -44,7 +54,15 @@ export default async function WeekPage() {
     completionsByHabit.set(c.habitId, list);
   }
 
-  const stats = calculateWeeklyStats(activeHabits, completionsByHabit);
+  const categoryColorByHabit = new Map<string, string>(
+    activeHabits.map((h) => [h.id, h.categoryColor])
+  );
+
+  const stats = calculateWeeklyStats(
+    activeHabits,
+    completionsByHabit,
+    categoryColorByHabit
+  );
 
   return (
     <main>

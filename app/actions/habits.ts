@@ -8,10 +8,14 @@ import { daysToMask, type DayKey } from "@/lib/dateUtils";
 
 export type ActionResult = { ok: true } | { ok: false; error: string };
 
-export async function addHabit(input: {
+type HabitInput = {
   name: string;
   days: DayKey[];
-}): Promise<ActionResult> {
+  icon: string;
+  categoryId: string;
+};
+
+export async function addHabit(input: HabitInput): Promise<ActionResult> {
   const name = input.name.trim();
 
   if (!name) {
@@ -20,10 +24,15 @@ export async function addHabit(input: {
   if (input.days.length === 0) {
     return { ok: false, error: "Elegí al menos un día de la semana." };
   }
+  if (!input.categoryId) {
+    return { ok: false, error: "Elegí o creá una categoría." };
+  }
 
   try {
     await db.insert(habits).values({
       name,
+      icon: input.icon || "⭐",
+      categoryId: input.categoryId,
       scheduledDays: daysToMask(input.days),
     });
   } catch (err) {
@@ -40,11 +49,9 @@ export async function addHabit(input: {
   return { ok: true };
 }
 
-export async function editHabit(input: {
-  id: string;
-  name: string;
-  days: DayKey[];
-}): Promise<ActionResult> {
+export async function editHabit(
+  input: HabitInput & { id: string }
+): Promise<ActionResult> {
   const name = input.name.trim();
 
   if (!name) {
@@ -53,11 +60,19 @@ export async function editHabit(input: {
   if (input.days.length === 0) {
     return { ok: false, error: "Elegí al menos un día de la semana." };
   }
+  if (!input.categoryId) {
+    return { ok: false, error: "Elegí o creá una categoría." };
+  }
 
   try {
     await db
       .update(habits)
-      .set({ name, scheduledDays: daysToMask(input.days) })
+      .set({
+        name,
+        icon: input.icon || "⭐",
+        categoryId: input.categoryId,
+        scheduledDays: daysToMask(input.days),
+      })
       .where(eq(habits.id, input.id));
   } catch (err) {
     return {

@@ -1,20 +1,34 @@
 import type { Config } from "tailwindcss";
 
-// Tokens tomados de sdd/design-system.md — únicos que se pueden usar en el proyecto.
+// Tokens tomados de sdd/design-system.md. Los colores referencian variables CSS
+// (definidas en app/globals.css, con bloques :root y .dark) en vez de hex fijos,
+// así las clases bg-background, text-text, etc. cambian solas según el tema.
 export default {
+  darkMode: "class",
   content: ["./app/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}"],
   theme: {
     extend: {
       colors: {
-        background: "#FAFAF9",
-        surface: "#FFFFFF",
-        border: "#E7E5E4",
-        text: "#1C1917",
-        "text-muted": "#78716C",
-        primary: "#292524",
-        accent: "#16A34A",
-        warning: "#D97706",
-        destructive: "#DC2626",
+        background: "rgb(var(--color-background) / <alpha-value>)",
+        surface: "rgb(var(--color-surface) / <alpha-value>)",
+        border: "rgb(var(--color-border) / <alpha-value>)",
+        text: "rgb(var(--color-text) / <alpha-value>)",
+        "text-muted": "rgb(var(--color-text-muted) / <alpha-value>)",
+        primary: "rgb(var(--color-primary) / <alpha-value>)",
+        accent: "rgb(var(--color-accent) / <alpha-value>)",
+        warning: "rgb(var(--color-warning) / <alpha-value>)",
+        destructive: "rgb(var(--color-destructive) / <alpha-value>)",
+        // Paleta fija de categorías — no cambia con el tema
+        cat: {
+          green: "#16A34A",
+          blue: "#2563EB",
+          violet: "#7C3AED",
+          pink: "#DB2777",
+          orange: "#EA580C",
+          yellow: "#CA8A04",
+          cyan: "#0891B2",
+          gray: "#57534E",
+        },
       },
       fontFamily: {
         sans: [

@@ -9,11 +9,31 @@ import {
 } from "drizzle-orm/pg-core";
 import { relations, sql } from "drizzle-orm";
 
+export const categories = pgTable(
+  "categories",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    name: text("name").notNull(),
+    // Hex de la paleta fija — ver sdd/design-system.md → "Paleta de categorías"
+    color: text("color").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => ({
+    uniqueName: uniqueIndex("uq_categories_name").on(table.name),
+  })
+);
+
 export const habits = pgTable(
   "habits",
   {
     id: uuid("id").primaryKey().defaultRandom(),
     name: text("name").notNull(),
+    icon: text("icon").notNull().default("⭐"), // emoji libre elegido por el usuario
+    categoryId: uuid("category_id")
+      .notNull()
+      .references(() => categories.id),
     // Bitmask 0-127. Bit por día: Lunes=1, Martes=2, Miércoles=4, Jueves=8,
     // Viernes=16, Sábado=32, Domingo=64. Ver lib/dateUtils.ts.
     scheduledDays: smallint("scheduled_days").notNull(),
@@ -53,8 +73,16 @@ export const habitCompletions = pgTable(
   })
 );
 
-export const habitsRelations = relations(habits, ({ many }) => ({
+export const categoriesRelations = relations(categories, ({ many }) => ({
+  habits: many(habits),
+}));
+
+export const habitsRelations = relations(habits, ({ many, one }) => ({
   completions: many(habitCompletions),
+  category: one(categories, {
+    fields: [habits.categoryId],
+    references: [categories.id],
+  }),
 }));
 
 export const habitCompletionsRelations = relations(
@@ -67,6 +95,8 @@ export const habitCompletionsRelations = relations(
   })
 );
 
+export type Category = typeof categories.$inferSelect;
+export type NewCategory = typeof categories.$inferInsert;
 export type Habit = typeof habits.$inferSelect;
 export type NewHabit = typeof habits.$inferInsert;
 export type HabitCompletion = typeof habitCompletions.$inferSelect;
