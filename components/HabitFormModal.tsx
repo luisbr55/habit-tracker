@@ -7,6 +7,7 @@ import { DAY_ORDER, DAY_LABELS, type DayKey } from "@/lib/dateUtils";
 import { CATEGORY_COLORS } from "@/lib/categoryColors";
 import type { Category } from "@/db/schema";
 
+type CategoryColor = (typeof CATEGORY_COLORS)[number]["hex"];
 type Props = {
   open: boolean;
   onClose: () => void;
@@ -21,8 +22,22 @@ type Props = {
 };
 
 const COMMON_EMOJIS = [
-  "⭐", "💧", "🏃", "📚", "🧘", "🥗", "😴", "🚭",
-  "💪", "🎨", "✍️", "🧹", "🌱", "🎯", "💰", "☀️",
+  "⭐",
+  "💧",
+  "🏃",
+  "📚",
+  "🧘",
+  "🥗",
+  "😴",
+  "🚭",
+  "💪",
+  "🎨",
+  "✍️",
+  "🧹",
+  "🌱",
+  "🎯",
+  "💰",
+  "☀️",
 ];
 
 export function HabitFormModal({ open, onClose, editing }: Props) {
@@ -38,8 +53,8 @@ export function HabitFormModal({ open, onClose, editing }: Props) {
   const [categories, setCategories] = useState<Category[]>([]);
   const [creatingCategory, setCreatingCategory] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState("");
-  const [newCategoryColor, setNewCategoryColor] = useState(
-    CATEGORY_COLORS[0].hex
+  const [newCategoryColor, setNewCategoryColor] = useState<CategoryColor>(
+    CATEGORY_COLORS[0].hex,
   );
 
   useEffect(() => {
@@ -52,7 +67,7 @@ export function HabitFormModal({ open, onClose, editing }: Props) {
 
   function toggleDay(day: DayKey) {
     setDays((prev) =>
-      prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day]
+      prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day],
     );
   }
 
