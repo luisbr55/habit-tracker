@@ -1,4 +1,5 @@
-import { isNull, inArray, eq } from "drizzle-orm";
+import { and, isNull, inArray, eq } from "drizzle-orm";
+import { auth } from "@/auth";
 import { db } from "@/db";
 import { habits, habitCompletions, categories } from "@/db/schema";
 import { isScheduledDay, todayISO } from "@/lib/dateUtils";
@@ -7,15 +8,20 @@ import { NavTabs } from "@/components/NavTabs";
 import { HabitList } from "@/components/HabitList";
 import { AddHabitButton } from "@/components/AddHabitButton";
 import { EmptyState } from "@/components/EmptyState";
+import { VerifyEmailBanner } from "@/components/VerifyEmailBanner";
 import type { HabitWithStatus } from "@/lib/types";
 
 export default async function TodayPage() {
+  const session = await auth();
+  const userId = session!.user.id; // el middleware ya garantiza que hay sesión
+
   const today = new Date();
   const todayStr = todayISO();
 
   const activeHabits = await db
     .select({
       id: habits.id,
+      userId: habits.userId,
       name: habits.name,
       icon: habits.icon,
       categoryId: habits.categoryId,
@@ -30,11 +36,14 @@ export default async function TodayPage() {
     })
     .from(habits)
     .innerJoin(categories, eq(habits.categoryId, categories.id))
-    .where(isNull(habits.archivedAt));
+    .where(and(eq(habits.userId, userId), isNull(habits.archivedAt)));
+
+  const banner = !session!.user.emailVerified ? <VerifyEmailBanner /> : null;
 
   if (activeHabits.length === 0) {
     return (
       <main>
+        {banner}
         <NavTabs />
         <EmptyState
           title="Todavía no tenés hábitos."
@@ -80,6 +89,7 @@ export default async function TodayPage() {
 
   return (
     <main>
+      {banner}
       <NavTabs />
       <HabitList habits={habitsWithStatus} today={todayStr} />
       <AddHabitButton />

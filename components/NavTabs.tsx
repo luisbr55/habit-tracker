@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ThemeToggle } from "./ThemeToggle";
+import { LogoutButton } from "./LogoutButton";
 
 const TABS = [
   { href: "/", label: "Hoy" },
@@ -33,6 +34,7 @@ export function NavTabs() {
         })}
       </div>
       <ThemeToggle />
+      <LogoutButton />
     </nav>
   );
 }

@@ -1,4 +1,5 @@
-import { isNull, inArray, eq } from "drizzle-orm";
+import { and, isNull, inArray, eq } from "drizzle-orm";
+import { auth } from "@/auth";
 import { db } from "@/db";
 import { habits, habitCompletions, categories } from "@/db/schema";
 import { calculateWeeklyStats } from "@/lib/weeklyStats";
@@ -7,11 +8,16 @@ import { WeeklyOverallProgress } from "@/components/WeeklyOverallProgress";
 import { HabitWeeklyRow } from "@/components/HabitWeeklyRow";
 import { EmptyState } from "@/components/EmptyState";
 import { AddHabitButton } from "@/components/AddHabitButton";
+import { VerifyEmailBanner } from "@/components/VerifyEmailBanner";
 
 export default async function WeekPage() {
+  const session = await auth();
+  const userId = session!.user.id;
+
   const activeHabits = await db
     .select({
       id: habits.id,
+      userId: habits.userId,
       name: habits.name,
       icon: habits.icon,
       categoryId: habits.categoryId,
@@ -22,11 +28,14 @@ export default async function WeekPage() {
     })
     .from(habits)
     .innerJoin(categories, eq(habits.categoryId, categories.id))
-    .where(isNull(habits.archivedAt));
+    .where(and(eq(habits.userId, userId), isNull(habits.archivedAt)));
+
+  const banner = !session!.user.emailVerified ? <VerifyEmailBanner /> : null;
 
   if (activeHabits.length === 0) {
     return (
       <main>
+        {banner}
         <NavTabs />
         <EmptyState
           title="Todavía no tenés hábitos."
@@ -66,6 +75,7 @@ export default async function WeekPage() {
 
   return (
     <main>
+      {banner}
       <NavTabs />
       <div className="flex flex-col gap-4">
         <WeeklyOverallProgress percentage={stats.overall.percentage} />

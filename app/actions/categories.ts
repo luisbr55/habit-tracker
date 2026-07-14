@@ -1,19 +1,32 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { asc } from "drizzle-orm";
+import { and, asc, eq } from "drizzle-orm";
+import { auth } from "@/auth";
 import { db } from "@/db";
 import { categories } from "@/db/schema";
 import type { ActionResult } from "./habits";
 
+async function requireUserId(): Promise<string> {
+  const session = await auth();
+  if (!session?.user?.id) throw new Error("No autenticado");
+  return session.user.id;
+}
+
 export async function listCategories() {
-  return db.select().from(categories).orderBy(asc(categories.name));
+  const userId = await requireUserId();
+  return db
+    .select()
+    .from(categories)
+    .where(eq(categories.userId, userId))
+    .orderBy(asc(categories.name));
 }
 
 export async function addCategory(input: {
   name: string;
   color: string;
 }): Promise<ActionResult & { id?: string }> {
+  const userId = await requireUserId();
   const name = input.name.trim();
   if (!name) {
     return { ok: false, error: "El nombre de la categoría no puede estar vacío." };
@@ -22,7 +35,7 @@ export async function addCategory(input: {
   try {
     const [created] = await db
       .insert(categories)
-      .values({ name, color: input.color })
+      .values({ userId, name, color: input.color })
       .returning({ id: categories.id });
 
     revalidatePath("/");
