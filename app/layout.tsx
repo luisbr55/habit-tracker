@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { ThemeProvider } from "@/components/ThemeProvider";
 
 export const metadata: Metadata = {
   title: "Hábitos",
@@ -14,11 +15,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="es">
+    <html lang="es" suppressHydrationWarning>
       <body className="font-sans text-base">
-        <div className="mx-auto min-h-screen w-full max-w-app bg-background px-4 pb-24 pt-6">
-          {children}
-        </div>
+        <ThemeProvider>
+          <div className="mx-auto min-h-screen w-full max-w-app bg-background px-4 pb-24 pt-6">
+            {children}
+          </div>
+        </ThemeProvider>
       </body>
     </html>
   );
