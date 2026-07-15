@@ -6,20 +6,18 @@ import bcrypt from "bcryptjs";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { users, accounts } from "@/db/schema";
+import authConfig from "./auth.config";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  secret: process.env.AUTH_SECRET,
+  ...authConfig,
   // El adapter maneja la tabla de accounts (Google) y de users; la sesión igual
-  // queda en JWT (ver comentario en "session" más abajo) porque Credentials no es
-  // compatible con sesiones de tipo "database" en Auth.js v5.
+  // queda en JWT porque Credentials no es compatible con sesiones de tipo
+  // "database" en Auth.js v5.
   adapter: DrizzleAdapter(db, {
     usersTable: users,
     accountsTable: accounts,
   }) as any,
   session: { strategy: "jwt" },
-  pages: {
-    signIn: "/login",
-  },
   providers: [
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID,
@@ -60,6 +58,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
+    ...authConfig.callbacks,
     async signIn({ user, account }) {
       // Google ya confirmó el email — lo marcamos verificado en nuestra tabla.
       if (account?.provider === "google" && user.id) {
