@@ -1,10 +1,5 @@
-import NextAuth from "next-auth";
-
-import authConfig from "./auth.config";
-
 import { NextResponse } from "next/server";
-
-const { auth } = NextAuth(authConfig);
+import { auth } from "@/auth";
 
 const PUBLIC_PATHS = [
   "/login",
@@ -22,27 +17,19 @@ export default auth((req) => {
     pathname.startsWith("/api/auth");
 
   if (!req.auth && !isPublic) {
-    const login = new URL("/login", req.nextUrl.origin);
-
-    login.searchParams.set("callbackUrl", pathname);
-
-    return NextResponse.redirect(login);
+    const loginUrl = new URL("/login", req.nextUrl.origin);
+    loginUrl.searchParams.set("callbackUrl", pathname);
+    return NextResponse.redirect(loginUrl);
   }
 
-  if (
-    req.auth &&
-    (pathname === "/login" || pathname === "/signup")
-  ) {
-    return NextResponse.redirect(
-      new URL("/", req.nextUrl.origin)
-    );
+  if (req.auth && (pathname === "/login" || pathname === "/signup")) {
+    return NextResponse.redirect(new URL("/", req.nextUrl.origin));
   }
 
   return NextResponse.next();
 });
 
 export const config = {
-  matcher: [
-    "/((?!api|_next/static|_next/image|favicon.ico).*)",
-  ],
+  // Corre en todo menos assets estáticos y archivos internos de Next
+  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
 };
