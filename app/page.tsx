@@ -1,4 +1,5 @@
 import { and, isNull, inArray, eq } from "drizzle-orm";
+import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { db } from "@/db";
 import { habits, habitCompletions, categories } from "@/db/schema";
@@ -13,7 +14,8 @@ import type { HabitWithStatus } from "@/lib/types";
 
 export default async function TodayPage() {
   const session = await auth();
-  const userId = session!.user.id; // el middleware ya garantiza que hay sesión
+  if (!session?.user?.id) redirect("/login");
+  const userId = session.user.id;
 
   const today = new Date();
   const todayStr = todayISO();
@@ -38,7 +40,7 @@ export default async function TodayPage() {
     .innerJoin(categories, eq(habits.categoryId, categories.id))
     .where(and(eq(habits.userId, userId), isNull(habits.archivedAt)));
 
-  const banner = !session!.user.emailVerified ? <VerifyEmailBanner /> : null;
+  const banner = !session.user.emailVerified ? <VerifyEmailBanner /> : null;
 
   if (activeHabits.length === 0) {
     return (

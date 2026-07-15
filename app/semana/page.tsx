@@ -1,4 +1,5 @@
 import { and, isNull, inArray, eq } from "drizzle-orm";
+import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { db } from "@/db";
 import { habits, habitCompletions, categories } from "@/db/schema";
@@ -12,7 +13,8 @@ import { VerifyEmailBanner } from "@/components/VerifyEmailBanner";
 
 export default async function WeekPage() {
   const session = await auth();
-  const userId = session!.user.id;
+  if (!session?.user?.id) redirect("/login");
+  const userId = session.user.id;
 
   const activeHabits = await db
     .select({
@@ -30,7 +32,7 @@ export default async function WeekPage() {
     .innerJoin(categories, eq(habits.categoryId, categories.id))
     .where(and(eq(habits.userId, userId), isNull(habits.archivedAt)));
 
-  const banner = !session!.user.emailVerified ? <VerifyEmailBanner /> : null;
+  const banner = !session.user.emailVerified ? <VerifyEmailBanner /> : null;
 
   if (activeHabits.length === 0) {
     return (
