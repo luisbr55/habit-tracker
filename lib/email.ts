@@ -32,3 +32,26 @@ export async function sendPasswordResetEmail(email: string, token: string) {
     `,
   });
 }
+
+export async function sendDigestEmail(
+  email: string,
+  input: { missingHabitNames: string[]; allDone: boolean }
+) {
+  const subject = input.allDone
+    ? "¡Completaste todo hoy! 🎉"
+    : `Te faltan ${input.missingHabitNames.length} hábito${
+        input.missingHabitNames.length === 1 ? "" : "s"
+      } hoy`;
+
+  const html = input.allDone
+    ? `<p>¡Completaste todos tus hábitos programados de hoy! 🎉 Seguí así.</p>`
+    : `
+      <p>Todavía te faltan estos hábitos hoy:</p>
+      <ul>
+        ${input.missingHabitNames.map((name) => `<li>${name}</li>`).join("")}
+      </ul>
+      <p><a href="${process.env.AUTH_URL}">Marcarlos como completados</a></p>
+    `;
+
+  await resend.emails.send({ from: FROM, to: email, subject, html });
+}

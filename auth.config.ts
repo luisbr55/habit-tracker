@@ -6,6 +6,7 @@ const PUBLIC_PATHS = [
   "/verify-email",
   "/forgot-password",
   "/reset-password",
+  "/api/cron", // protegido con CRON_SECRET propio, no con sesión de usuario
 ];
 
 // Config "liviana": sin providers reales, sin bcrypt, sin adapter de Drizzle.

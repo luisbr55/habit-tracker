@@ -38,13 +38,13 @@ export const accounts = pgTable(
     type: text("type").notNull(),
     provider: text("provider").notNull(),
     providerAccountId: text("provider_account_id").notNull(),
-    refresh_token: text("refresh_token"),
-    access_token: text("access_token"),
-    expires_at: integer("expires_at"),
-    token_type: text("token_type"),
+    refreshToken: text("refresh_token"),
+    accessToken: text("access_token"),
+    expiresAt: integer("expires_at"),
+    tokenType: text("token_type"),
     scope: text("scope"),
-    id_token: text("id_token"),
-    session_state: text("session_state"),
+    idToken: text("id_token"),
+    sessionState: text("session_state"),
   },
   (table) => ({
     uniqueProviderAccount: uniqueIndex("uq_accounts_provider_account").on(
@@ -74,9 +74,9 @@ export const categories = pgTable(
   "categories",
   {
     id: uuid("id").primaryKey().defaultRandom(),
-    userId: uuid("user_id").references(() => users.id, {
-      onDelete: "cascade",
-    }), // nullable temporalmente — ver "Migración de datos existentes" en technical-spec.md
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
     name: text("name").notNull(),
     // Hex de la paleta fija — ver sdd/design-system.md → "Paleta de categorías"
     color: text("color").notNull(),
@@ -96,9 +96,9 @@ export const habits = pgTable(
   "habits",
   {
     id: uuid("id").primaryKey().defaultRandom(),
-    userId: uuid("user_id").references(() => users.id, {
-      onDelete: "cascade",
-    }), // nullable temporalmente — ver "Migración de datos existentes" en technical-spec.md
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
     name: text("name").notNull(),
     icon: text("icon").notNull().default("⭐"), // emoji libre elegido por el usuario
     categoryId: uuid("category_id")
