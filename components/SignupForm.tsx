@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import Link from "next/link";
 import { signUp } from "@/app/actions/auth";
 import { loginWithGoogle } from "@/app/actions/session";
+import { GoogleIcon } from "./GoogleIcon";
 
 export function SignupForm() {
   const [error, setError] = useState<string | null>(null);
@@ -81,8 +82,9 @@ export function SignupForm() {
       <form action={loginWithGoogle}>
         <button
           type="submit"
-          className="w-full rounded-control border border-border py-2 text-sm text-text"
+          className="flex w-full items-center justify-center gap-2 rounded-control border border-border py-2 text-sm text-text"
         >
+          <GoogleIcon />
           Continuar con Google
         </button>
       </form>

@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import Link from "next/link";
 import { loginWithCredentials, loginWithGoogle } from "@/app/actions/session";
+import { GoogleIcon } from "./GoogleIcon";
 
 export function LoginForm() {
   const [state, formAction, isPending] = useActionState(
@@ -50,8 +51,9 @@ export function LoginForm() {
       <form action={loginWithGoogle}>
         <button
           type="submit"
-          className="w-full rounded-control border border-border py-2 text-sm text-text"
+          className="flex w-full items-center justify-center gap-2 rounded-control border border-border py-2 text-sm text-text"
         >
+          <GoogleIcon />
           Continuar con Google
         </button>
       </form>
