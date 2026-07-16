@@ -17,7 +17,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     usersTable: users,
     accountsTable: accounts,
   } as any) as any,
-  session: { strategy: "jwt" },
   providers: [
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID,

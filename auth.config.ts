@@ -15,6 +15,13 @@ const PUBLIC_PATHS = [
 export default {
   secret: process.env.AUTH_SECRET,
   pages: { signIn: "/login" },
+  // Sesión corta por seguridad: expira a las 2 horas de inactividad. Se renueva
+  // sola si el usuario sigue usando la app (updateAge = cada 30 min de uso activo).
+  session: {
+    strategy: "jwt",
+    maxAge: 2 * 60 * 60, // 2 horas, en segundos
+    updateAge: 30 * 60, // renueva el token cada 30 min de actividad
+  },
   providers: [],
   callbacks: {
     authorized({ auth, request }) {
