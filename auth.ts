@@ -16,7 +16,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: DrizzleAdapter(db, {
     usersTable: users,
     accountsTable: accounts,
-  }) as any,
+  } as any) as any,
   session: { strategy: "jwt" },
   providers: [
     Google({
